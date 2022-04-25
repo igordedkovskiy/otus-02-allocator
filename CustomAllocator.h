@@ -10,10 +10,9 @@ template<typename T> struct TD;
 
 namespace custom_allocator
 {
-
-template<typename T, std::size_t SIZE = 8> class CustomAllocator
+	
+template<typename T, std::size_t SIZE = 8> struct CustomAllocator
 {
-public:
     using value_type = T;
     using pointer = T*;
     using const_pointer = const T*;
@@ -84,8 +83,8 @@ public:
             storage_status.reset(p - start);
         p->~T();
     }
-
-private:
+	
+//private:
     inline bool is_storage_empty() const
     {
         return !storage_status.any();
