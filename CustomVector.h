@@ -11,10 +11,64 @@ namespace custom_vector
 	
 template<typename T, typename Allocator = std::allocator<T>> struct CustomVector
 {
-	struct CustomIterator
+    struct Iterator
 	{
 		using value_type = T;
+        using pointer = T*;
 		using reference = T&;
+
+        Iterator() noexcept = default;
+
+        Iterator(pointer p) noexcept:
+            ptr{p}
+        {}
+
+        Iterator(const Iterator& l) noexcept:
+            ptr{l.ptr}
+        {}
+
+        ~Iterator() noexcept = default;
+
+        Iterator& operator=(const Iterator& l) noexcept
+        {
+            ptr = l.ptr;
+            return *this;
+        }
+
+        Iterator& operator++() noexcept
+        {
+            ++ptr;
+            return *this;
+        }
+
+        Iterator& operator--() noexcept
+        {
+            --ptr;
+            return *this;
+        }
+
+        reference operator*() const noexcept
+        {
+            return *ptr;
+        }
+
+        pointer operator->() const noexcept
+        {
+            return ptr;
+        }
+
+        friend bool operator==(const Iterator& l, const Iterator& r) noexcept
+        {
+            return l.ptr == r.ptr;
+        }
+
+        friend bool operator!=(const Iterator& l, const Iterator& r) noexcept
+        {
+            return l.ptr != r.ptr;
+        }
+
+    private:
+        T* ptr = nullptr;
 	};
 	
     using value_type = T;
@@ -22,57 +76,76 @@ template<typename T, typename Allocator = std::allocator<T>> struct CustomVector
     using const_pointer = const T*;
     using reference = T&;
     using const_reference = const T&;
-	using iterator = CustomIterator;
+    using iterator = Iterator;
 
     CustomVector() = default;
     ~CustomVector() = default;
+
+    iterator begin() noexcept
+    {
+        return iterator{m_start};
+    }
+
+    iterator end() noexcept
+    {
+        return iterator{m_end};
+    }
 	
 	template<typename... Args> void emplace_back(Args&&... args)
 	{
 		// if allocator is stateless
 		//if constexpr(std::is_same<Allocator, std::allocator>)
-		//{
+        //{
         //    std::allocator<T> allocator;
-		//    auto p = allocator.allocate(1);
-		//    allocator.construct(p, std::forward<Args>(args)...);
-		//}
+        //    auto p = allocator.allocate(1);
+        //    allocator.construct(p, std::forward<Args>(args)...);
+        //}
 		// if allocator is not stateless
 		//else if constexpr(!std::is_same<Allocator, std::allocator>)
-		//{
-		//    auto p = allocator.allocate(1);
-		//    allocator.construct(p, std::forward<Args>(args)...);
-		//}
-		auto p = allocator.allocate(1);
-		allocator.construct(p, std::forward<Args>(args)...);
+        //{
+        //    auto p = allocator.allocate(1);
+        //    allocator.construct(p, std::forward<Args>(args)...);
+        //}
+        const auto p = allocator.allocate(1 + size());
+        allocator.construct(p + size(), std::forward<Args>(args)...);
+        if(m_start)
+        {
+            for(std::size_t cntr = 0; cntr < size(); ++cntr)
+            {
+                allocator.construct(p + cntr, *(m_start + cntr));
+                allocator.destroy(m_start + cntr);
+            }
+            allocator.deallocate(m_start, size());
+        }
+        m_end = p + size() + 1;
+        m_start = p;
 	}
 	
-	
-	
-	T& operator[](std::size_t index) noexcept
+    inline T& operator[](std::size_t index) noexcept
+    {
+        return *(m_start + index);
+    }
+
+//	T& at(std::size_t index)
+//	{
+//        if(index >= m_size)
+//			throw ...;
+//        return *(m_start + index);
+//	}
+
+    inline std::size_t size() const noexcept
 	{
-		return *(start + index);
+        return m_end - m_start;
 	}
 	
-	T& at(std::size_t index)
+    inline bool empty() const noexcept
 	{
-		if(index >= size)
-			throw ...;
-		return *(start + index);
-	}
-	
-	std::size_t size() const noexcept
-	{
-		return size;
-	}
-	
-	bool empty() const noexcept
-	{
-		return !size;
+        return !size();
 	}
 	
 	Allocator allocator;
-	T* start = nullptr;
-	std::size_t size = 0;
+    T* m_start = nullptr;
+    T* m_end = nullptr;
 };
 
 }

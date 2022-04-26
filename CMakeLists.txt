@@ -9,7 +9,7 @@ option(WITH_GTEST "Whether to build google test" ON)
 
 configure_file(version.h.in version.h)
 
-add_executable(${PROJECT_NAME} "main.cpp" "CustomAllocator.h")
+add_executable(${PROJECT_NAME} "main.cpp" "CustomAllocator.h" "CustomVector.h")
 #add_library(CustomAllocator_lib "CustomAllocator.h")
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
