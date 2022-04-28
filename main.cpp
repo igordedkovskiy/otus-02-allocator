@@ -6,49 +6,79 @@
 #include "CustomAllocator.h"
 #include "CustomVector.h"
 
+constexpr std::size_t factorial(std::size_t n) noexcept
+{
+    return n ? (n * factorial(n - 1)) : 1;
+}
+
 using namespace custom_allocator;
 using namespace custom_vector;
 
-template<typename T> void print_vec(const T& arg)
+template<typename F, typename S> std::ostream& operator<<(std::ostream& o, const std::pair<const F, S>& el)
 {
-    std::cout << "size = " << arg.size() << "\nvalue:\n";
-    for(const auto it:arg)
-        std::cout << it << " ";
-    std::cout << "\n\n";
+    o << el.first << " " << el.second;
+    return o;
 }
 
-template<typename T> void print_map(const T& arg)
+template<typename T> void print(const T& arg)
 {
-    std::cout << "size = " << arg.size() << "\nvalue:\n";
     for(const auto it:arg)
-        std::cout << '[' << it.first << "," << it.second << "] ";
-    std::cout << "\n\n";
+        std::cout << it << "; ";
+    std::cout << '\n';
+}
+
+template<typename T> void filL_vec(T& arg, std::size_t size)
+{
+    for(std::size_t cntr = 0; cntr < size; ++cntr)
+        arg.emplace_back(cntr);
+}
+
+template<typename T> void filL_map(T& arg, std::size_t size)
+{
+    for(std::size_t cntr = 0; cntr < size; ++cntr)
+        arg.insert({cntr, factorial(cntr)});
 }
 
 int main()
 {
     {
-        CustomVector<int> vec;
-        for(std::size_t cntr = 0; cntr < 15; ++cntr)
-            vec.emplace_back(cntr + 1);
-        for(const auto it:vec)
-            std::cout << it << ' ';
-        std::cout << '\n';
-        for(std::size_t cntr = 0; cntr < vec.size(); ++cntr)
-            std::cout << vec[cntr] << ' ';
-        std::cout << '\n';
+        std::map<int,int> mp;
+        filL_map(mp, 10);
+        print(mp);
     }
-    std::cout << '\n';
     {
-        CustomVector<int, CustomAllocator<int>> vec;
-        for(std::size_t cntr = 0; cntr < 15; ++cntr)
-            vec.emplace_back(cntr + 1);
-        for(const auto it:vec)
-            std::cout << it << ' ';
-        std::cout << '\n';
-        for(std::size_t cntr = 0; cntr < vec.size(); ++cntr)
-            std::cout << vec[cntr] << ' ';
-        std::cout << '\n';
+        std::map<int,int,std::less<int>, CustomAllocator<std::pair<const int,int>, 10>> mp;
+        filL_map(mp, 10);
+        print(mp);
+    }
+    {
+        CustomVector<int> vec;
+        filL_vec(vec, 10);
+        print(vec);
+    }
+    {
+        CustomVector<int, CustomAllocator<int,10>> vec;
+        filL_vec(vec, 10);
+        print(vec);
+    }
+
+    {
+        std::map<int,int,std::less<int>, CustomAllocator<std::pair<const int,int>, 4>> mp;
+        filL_map(mp, 10);
+        // remove an element
+        auto it = mp.find(4);
+        mp.erase(it);
+        print(mp);
+    }
+    {
+        CustomVector<int, CustomAllocator<int,6>> vec;
+        filL_vec(vec, 10);
+        auto it = vec.begin();
+        ++it;
+        ++it;
+        ++it;
+        vec.erase(it);
+        print(vec);
     }
     return 0;
 }

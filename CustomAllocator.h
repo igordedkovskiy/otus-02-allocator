@@ -46,8 +46,8 @@ template<typename T, std::size_t SIZE = 8> struct CustomAllocator
             }
             else
             {
-                // are there n free consencutive elements is a storage
-                // index - of first of n free consencutive elements
+                // are there n free consencutive elements in a storage?
+                // index - an index of first of n free consencutive elements
                 const auto index = find_free_elements(n);
                 if(index < SIZE)
                     return start + index;

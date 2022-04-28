@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <memory>
 
-template<typename T> struct TD;
+//template<typename T> struct TD;
 
 namespace custom_vector
 {
@@ -77,18 +77,44 @@ template<typename T, typename Allocator = std::allocator<T>> struct CustomVector
     using reference = T&;
     using const_reference = const T&;
     using iterator = Iterator;
+    using const_iterator = const Iterator;
 
     CustomVector() = default;
     ~CustomVector() = default;
 
     iterator begin() noexcept
     {
-        return iterator{m_start};
+        return {m_start};
+    }
+
+    const_iterator begin() const noexcept
+    {
+        return {m_start};
     }
 
     iterator end() noexcept
     {
-        return iterator{m_end};
+        return {m_end};
+    }
+
+    const_iterator end() const noexcept
+    {
+        return {m_end};
+    }
+
+    iterator erase(const_iterator pos)
+    {
+        if(pos == end())
+            return end();
+        auto p = &(*pos);
+        while(p < m_end)
+        {
+            allocator.destroy(p);
+            allocator.construct(p, *(p + 1));
+            ++p;
+        }
+        --m_end;
+        return {&(*pos) + 1};
     }
 	
 	template<typename... Args> void emplace_back(Args&&... args)
@@ -125,13 +151,6 @@ template<typename T, typename Allocator = std::allocator<T>> struct CustomVector
     {
         return *(m_start + index);
     }
-
-//	T& at(std::size_t index)
-//	{
-//        if(index >= m_size)
-//			throw ...;
-//        return *(m_start + index);
-//	}
 
     inline std::size_t size() const noexcept
 	{
