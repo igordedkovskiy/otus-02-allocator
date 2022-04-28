@@ -107,12 +107,13 @@ template<typename T, typename Allocator = std::allocator<T>> struct CustomVector
         if(pos == end())
             return end();
         auto p = &(*pos);
-        while(p < m_end)
+        while(p < m_end-1)
         {
             allocator.destroy(p);
             allocator.construct(p, *(p + 1));
             ++p;
         }
+        allocator.destroy(p);
         --m_end;
         return {&(*pos) + 1};
     }
