@@ -13,10 +13,10 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-      - run: cmake -S . -B ./Release -DPATCH_VERSION=${{ github.run_number }} -DWITH_GTEST=ON
-      - run: cmake --build ./Release
-      - run: cmake --build ./Release --target test
-      - run: cmake --build ./Release --target package
+      - run: cmake -S . -B ./Build -DPATCH_VERSION=${{ github.run_number }} -DWITH_GTEST=ON
+      - run: cmake --build ./Build
+      - run: cmake --build ./Build --target test
+      - run: cmake --build ./Build --target package
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -34,6 +34,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Release/ip_filter-0.0.${{ github.run_number }}-Linux.deb
-          asset_name: ip_filter-0.0.${{ github.run_number }}-Linux.deb
+          asset_path: ./Build/allocator-0.0.${{ github.run_number }}-Linux.deb
+          asset_name: allocator-0.0.${{ github.run_number }}-Linux.deb
           asset_content_type: application/vnd.debian.binary-package
