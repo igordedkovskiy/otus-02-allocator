@@ -64,6 +64,8 @@ template<typename T, std::size_t SIZE = 8> struct CustomAllocator
 
     inline void deallocate(T* p, std::size_t)
     {
+        if(!p)
+            return;
         if(p == start && is_storage_empty())
             start = nullptr;
         if(!start || (p < start) || (p > start + SIZE - 1))
@@ -72,6 +74,8 @@ template<typename T, std::size_t SIZE = 8> struct CustomAllocator
 
     template<typename U, typename ...Args> void construct(U* p, Args&& ...args)
     {
+        if(!p)
+            return;
         static_assert(sizeof(T) >= sizeof(U), "Wtf?!");
         auto cast = [](auto p){ return reinterpret_cast<std::uint8_t*>(p); };
         if(start && (cast(p) >= cast(start)) && (cast(p) < cast(start + SIZE)))
@@ -84,6 +88,8 @@ template<typename T, std::size_t SIZE = 8> struct CustomAllocator
 
     inline void destroy(T* p)
     {
+        if(!p)
+            return;
         if(start && (p >= start) && (p < (start + SIZE)))
             storage_status.reset(p - start);
         p->~T();
