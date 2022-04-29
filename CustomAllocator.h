@@ -20,7 +20,12 @@ template<typename T, std::size_t SIZE = 8> struct CustomAllocator
     using const_reference = const T&;
 
     CustomAllocator() = default;
-    ~CustomAllocator() = default;
+    ~CustomAllocator()
+    {
+        if(start)
+            delete[] reinterpret_cast<std::uint8_t*>(start);
+        start = nullptr;
+    }
 
     template<typename U> CustomAllocator(const CustomAllocator<U, SIZE>&){}
 
@@ -113,6 +118,11 @@ template<typename T, std::size_t SIZE = 8> struct CustomAllocator
                 return cntr;
         }
         return SIZE;
+    }
+    
+    inline std::size_t elements_occupied() const noexcept
+    {
+        return storage_status.count();
     }
 
     T* start = nullptr; // first element of reserved space

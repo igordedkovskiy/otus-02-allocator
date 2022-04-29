@@ -80,7 +80,13 @@ template<typename T, typename Allocator = std::allocator<T>> struct CustomVector
     using const_iterator = const Iterator;
 
     CustomVector() = default;
-    ~CustomVector() = default;
+    ~CustomVector()
+    {
+        if(m_start)
+            allocator.deallocate(m_start, size());
+        m_start = nullptr;
+        m_end = nullptr;
+    }
 
     iterator begin() noexcept
     {
@@ -163,7 +169,7 @@ template<typename T, typename Allocator = std::allocator<T>> struct CustomVector
         return !size();
 	}
 	
-	Allocator allocator;
+    Allocator allocator;
     T* m_start = nullptr;
     T* m_end = nullptr;
 };
