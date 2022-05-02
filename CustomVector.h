@@ -168,7 +168,8 @@ template<typename T, typename Allocator = std::allocator<T>> struct CustomVector
 	{
         return !size();
 	}
-	
+
+private:
     Allocator allocator;
     T* m_start = nullptr;
     T* m_end = nullptr;
