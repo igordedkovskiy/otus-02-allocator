@@ -1,2 +1,2 @@
-# homework-02: otus-allocator
+# otus homework #2 - allocator
 custom allocator
